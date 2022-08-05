@@ -1,0 +1,24 @@
+﻿@using App.Core.Extensions
+@model App.Core.Models.Data.PartGroup
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+<div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff;">
+    <div style="float: left;">
+        @Model.Name section
+    </div>
+    
+    <div style="clear: both;"></div>
+</div>
+
+<div style="width: 100%;">
+    @foreach (var (page, i) in Model.Pages.WithIndex())
+    {
+        <div style="width: 80%; border: 1px solid darkcyan; background-color: darkcyan; color: #fff; margin-top: 10px; margin: 10px auto 0;">
+            <div style="width: 100px; padding-left: 10px;">
+                @($"{Model.Name} {(Model.Pages.Count > 1 ? $"Part {i+1}" : "")}")
+            </div>
+        </div>
+    }
+</div>

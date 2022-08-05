@@ -1,0 +1,26 @@
+{
+  "profiles": {
+    "Scrape (debug)": {
+      "commandName": "Project",
+      "commandLineArgs": "scrape"
+    },
+    "Scrape (release)": {
+      "commandName": "Project",
+      "commandLineArgs": "scrape",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "release"
+      }
+    },
+    "Build PDF (debug)": {
+      "commandName": "Project",
+      "commandLineArgs": "build-pdf --data-file C:\\Temp\\f-type-parts-scraper.20220804_210355\\results.json"
+    },
+    "Build PDF (release)": {
+      "commandName": "Project",
+      "commandLineArgs": "build-pdf --data-file C:\\Temp\\f-type-parts-scraper.20220804_210355\\results.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "release"
+      }
+    }
+  }
+}

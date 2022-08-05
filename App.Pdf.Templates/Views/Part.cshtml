@@ -1,0 +1,66 @@
+﻿@model App.Core.Models.Data.Part
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+<div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff;">
+    <div style="float: left; width: 100px;">
+        @Model.ImagePartNumber
+    </div>
+    <div style="float: left;">
+        @Model.Name
+    </div>
+    <div style="float: left; margin-left: 20px;">
+        -
+    </div>
+    <div style="float: left; margin-left: 20px;">
+        @Model.Description
+    </div>
+    <div style="float: right;">@Model.PartNumber</div>
+    <div style="clear: both;"></div>
+</div>
+
+<partial name="Shared/_Image" model="Model.ImageFile"/>
+
+<div style="width: 100%; text-align: left;">
+    <div style="margin: 0 auto 10px; width: 60%;">
+        <table>
+            @foreach (var field in new List<(string label, string value)>
+            {
+                new("Name", Model.Name),
+                new("Description", Model.Description),
+                new("Part number", Model.PartNumber)
+            })
+            {
+                <tr>
+                    <td>@field.label:</td>
+                    <td style="width: 20px;"></td>
+                    <td>@field.value</td>
+                </tr>
+            }
+
+            <tr>
+                <td>Web source:</td>
+                <td style="width: 20px;"></td>
+                <td><a href="@Model.Link">link</a></td>
+            </tr>
+
+            <tr style="margin-top: 30px;">
+                <td colspan="3">&nbsp;</td>
+            </tr>
+
+            @foreach (var field in new List<(string label, string value)>
+            {
+                new("List price", Model.ListPrice),
+                new("Web price", Model.OurPrice)
+            }.Where(field => !string.IsNullOrWhiteSpace(field.value)))
+            {
+                <tr>
+                    <td>@field.label:</td>
+                    <td style="width: 20px;"></td>
+                    <td>@field.value</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
