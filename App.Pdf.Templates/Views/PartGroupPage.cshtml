@@ -1,35 +1,59 @@
-﻿@model App.Pdf.Templates.Models.PartGroupPageViewModel
+﻿@using App.Core.Extensions
+@model App.Pdf.Templates.Models.PartGroupPageViewModel
 @{
     Layout = "Shared/_Layout.cshtml";
+
+    var partBatches = Model.Parts.Batch(8);
 }
 
-<div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff;">
-    <div style="float: left;">
-        @Model.PartGroup.Name section
+@foreach (var (partBatch, i) in partBatches.WithIndex())
+{
+    <div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff;">
+        <div style="float: left;">
+            @Model.PartGroup.Name Section @(i > 0 ? Html.Raw("<i>&nbsp;&nbsp;&nbsp; continued...</i>") : "")
+        </div>
+
+        @if (Model.PartGroup.Pages.Count > 1)
+        {
+            <div style="float: right;">Part @Model.SectionPartNumber</div>
+        }
+    
+        <div style="clear: both;"></div>
     </div>
 
-    @if (Model.PartGroup.Pages.Count > 1)
-    {
-        <div style="float: right;">Part @Model.SectionPartNumber</div>
-    }
-    
-    <div style="clear: both;"></div>
-</div>
+    <partial name="Shared/_Image" model="Model.ImageFile"/>
 
-<partial name="Shared/_Image" model="Model.ImageFile"/>
-
-<div style="width: 100%;">
-    @foreach (var part in Model.Parts)
+    @if (i > 0)
     {
-        <div style="width: 80%; border: 1px solid darkcyan; background-color: darkcyan; color: #fff; margin-top: 10px; margin: 10px auto 0;">
-            <div style="float: left; width: 100px; padding-left: 10px;">
-                @part.ImagePartNumber
-            </div>
-            <div style="float: left;">
-                @(part.Name)&nbsp;&nbsp;&nbsp;>&nbsp;&nbsp;&nbsp;@(part.Description) <br/>
-                @part.PartNumber
-            </div>
-            <div style="clear: both;"></div>
+        <div style="width: 80%; margin: 10px auto;">
+            @Html.Raw("<i>continued...</i>")
         </div>
     }
-</div>
+    
+    <div style="width: 100%;">
+        @foreach (var part in partBatch)
+        {
+            <div style="width: 80%; border: 1px solid darkcyan; background-color: darkcyan; color: #fff; margin: 10px auto 0; padding: 3px 10px;">
+                <div style="float: left; width: 70px; font-weight: bold;">
+                    @part.ImagePartNumber
+                </div>
+                <div style="float: left; font-weight: bold;">
+                    @part.Name
+                </div>
+                <div style="float: right; font-weight: bold;">
+                    @part.PartNumber
+                </div>
+                <div style="clear: both;"></div>
+
+                <div style="font-style: italic; font-size: 18px;">
+                    @part.Description
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (partBatches.Count > 1 && i < partBatches.Count - 1)
+    {
+        <div style="page-break-after: always;"></div>
+    }
+}

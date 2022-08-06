@@ -31,9 +31,6 @@
     <None Update="Configuration\file.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Configuration\ironpdf.json.example">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Configuration\ironpdf.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -2,6 +2,7 @@
 using App.Core.Models.Configuration;
 using App.Core.Models.Data;
 using App.Core.Models.Options;
+using App.Core.Models.Rendering;
 using App.Core.Services.Configuration;
 using App.Pdf.Templates.Models;
 using IronPdf;
@@ -54,17 +55,51 @@ public class BuildPdfService : IBuildPdfService
 
             var pdf = renderer.RenderHtmlAsPdf($"<div style=\"background: url('images/f-type.cover.jpg') no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover; width: 100%; height: 100%;font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 40px; text-align: center;\"><div style=\"height: 300px;\">&nbsp;</div><div style=\"width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff;\">Jag F-Type Parts Manual</div></div>");
 
+            // build table of contents wrapper
+            var toc = BuildToc(results);
+
+            // generate toc pdf
+            var tocHtml = await RazorTemplateEngine.RenderAsync("/Views/TableOfContents.cshtml", toc);
+
+            var tocPdf = Renderer().RenderHtmlAsPdf(tocHtml);
+
+            var tocPageCount = tocPdf.PageCount;
+
+            pdf.AppendPdf(tocPdf);
+
+            // build part group and sub-sections to pdfs
             foreach (var partGroup in results.PartGroups)
             {
-                var partGroupPdf = await ProcessPartGroup(partGroup);
-
-                partGroupPdf.BookMarks.AddBookMarkAtStart(partGroup.Name, 0, 0);
-
-                pdf.AppendPdf(partGroupPdf);
+                pdf.AppendPdf(await ProcessPartGroup(partGroup));
             }
 
+            // add footer
             pdf.AddHTMLFooters(await Footer(), true);
 
+            // build toc bookmarks
+            // page index is page number - 1 + toc page count
+            toc.PartGroups.Reverse();
+
+            foreach (var (tocPartGroup, tpgi) in toc.PartGroups.WithIndex())
+            {
+                tocPartGroup.PartGroupPages.Reverse();
+
+                foreach (var (tocPartGroupPage, tpgpi) in tocPartGroup.PartGroupPages.WithIndex())
+                {
+                    tocPartGroupPage.Parts.Reverse();
+
+                    foreach (var (tocPart, tpi) in tocPartGroupPage.Parts.WithIndex())
+                    {
+                        pdf.BookMarks.AddBookMarkAtStart(tocPart.Title, tocPart.PageNumber - 1 + tocPageCount, tocPart.Indent);
+                    }
+
+                    pdf.BookMarks.AddBookMarkAtStart(tocPartGroupPage.Title, tocPartGroupPage.PageNumber - 1 + tocPageCount, tocPartGroupPage.Indent);
+                }
+
+                pdf.BookMarks.AddBookMarkAtStart(tocPartGroup.Title, tocPartGroup.PageNumber - 1 + tocPageCount, tocPartGroup.Indent);
+            }
+            
+            // create output directory and build final PDF
             var runDateTime = DateTime.Now;
 
             var outputPath = Path.Join(_fileSettings.RunsDirectory, $"f-type-parts-pdf-builder.{runDateTime:yyyyMMdd_HHmmss}");
@@ -91,11 +126,7 @@ public class BuildPdfService : IBuildPdfService
 
         foreach (var (page, i) in partGroup.Pages.WithIndex())
         {
-            var partGroupPdf = await ProcessPartGroupPage(partGroup, page, i);
-
-            partGroupPdf.BookMarks.AddBookMarkAtStart(partGroup.Pages.Count > 1 ? $"{partGroup.Name} - Part {i + 1}" : partGroup.Name, 0, 1);
-
-            pdf.AppendPdf(partGroupPdf);
+            pdf.AppendPdf(await ProcessPartGroupPage(partGroup, page, i));
         }
 
         return pdf;
@@ -115,11 +146,7 @@ public class BuildPdfService : IBuildPdfService
 
         foreach (var part in partGroupPage.Parts)
         {
-            var partPdf = await ProcessPart(part);
-
-            partPdf.BookMarks.AddBookMarkAtStart(part.Name, 0, 2);
-
-            pdf.AppendPdf(partPdf);
+            pdf.AppendPdf(await ProcessPart(part));
         }
 
         return pdf;
@@ -134,6 +161,56 @@ public class BuildPdfService : IBuildPdfService
         var html = await RazorTemplateEngine.RenderAsync("/Views/Part.cshtml", part);
 
         return renderer.RenderHtmlAsPdf(html);
+    }
+
+    private TableOfContents BuildToc(Results results)
+    {
+        var toc = new TableOfContents();
+
+        int pageNumber = 2;
+
+        foreach (var partGroup in results.PartGroups)
+        {
+            var tocPartGroup = new TocPartGroup
+            {
+                PageNumber = pageNumber,
+                Title = partGroup.Name
+            };
+
+            pageNumber++;
+
+            foreach (var (partGroupPage, pgpi) in partGroup.Pages.WithIndex())
+            {
+                var tocPartGroupPage = new TocPartGroupPage
+                {
+                    Title = partGroup.Pages.Count < 2
+                        ? partGroupPage.Name
+                        : $"{partGroupPage.Name} - part {pgpi + 1}",
+                    PageNumber = pageNumber
+                };
+
+                pageNumber += partGroupPage.Parts.Batch(8).Count;
+
+                foreach (var part in partGroupPage.Parts)
+                {
+                    tocPartGroupPage.Parts.Add(new TocPart
+                    {
+                        Title = part.Name,
+                        PageNumber = pageNumber,
+                        PartNumber = part.PartNumber,
+                        DiagramPartNumber = part.ImagePartNumber
+                    });
+
+                    pageNumber++;
+                }
+
+                tocPartGroup.PartGroupPages.Add(tocPartGroupPage);
+            }
+
+            toc.PartGroups.Add(tocPartGroup);
+        }
+
+        return toc;
     }
 
     private static HtmlToPdf Renderer(int margin = 5) =>

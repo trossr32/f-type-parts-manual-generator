@@ -4,26 +4,30 @@
 }
 
 <div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff;">
-    <div style="float: left; width: 100px;">
-        @Model.ImagePartNumber
+    <div style="float: left; width: 70px;">
+        <strong>@Model.ImagePartNumber</strong>
     </div>
     <div style="float: left;">
         @Model.Name
     </div>
-    <div style="float: left; margin-left: 20px;">
+    @*<div style="float: left; margin-left: 10px;">
         -
-    </div>
-    <div style="float: left; margin-left: 20px;">
+    </div>*@
+    @*<div style="float: left; margin-left: 10px;">
+        @Model.Description
+    </div>*@
+    <div style="float: right;"><strong>@Model.PartNumber</strong></div>
+    <div style="clear: both;"></div>
+    
+    <div style="font-style: italic; font-size: 18px;">
         @Model.Description
     </div>
-    <div style="float: right;">@Model.PartNumber</div>
-    <div style="clear: both;"></div>
 </div>
 
 <partial name="Shared/_Image" model="Model.ImageFile"/>
 
 <div style="width: 100%; text-align: left;">
-    <div style="margin: 0 auto 10px; width: 60%;">
+    <div style="margin: 0 auto; width: 90%;">
         <table>
             @foreach (var field in new List<(string label, string value)>
             {
@@ -42,7 +46,7 @@
             <tr>
                 <td>Web source:</td>
                 <td style="width: 20px;"></td>
-                <td><a href="@Model.Link">link</a></td>
+                <td><a href="@Model.Link">@Model.Link</a></td>
             </tr>
 
             <tr style="margin-top: 30px;">

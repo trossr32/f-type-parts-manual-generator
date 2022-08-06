@@ -51,6 +51,8 @@ public class ScrapeService : IScrapeService
         try
         {
             await Scrape();
+
+            await File.WriteAllTextAsync(Path.Join(_outputPath, "results.json"), JsonConvert.SerializeObject(_results, Formatting.Indented));
         }
         catch (Exception e)
         {
@@ -180,8 +182,6 @@ public class ScrapeService : IScrapeService
 
             _results.PartGroups.Add(new PartGroup(partGroup, partGroupPages));
         }
-
-        await File.WriteAllTextAsync(Path.Join(_outputPath, "results.json"), JsonConvert.SerializeObject(partGroups, Formatting.Indented));
     }
 
     private async Task<List<Part>> GetPartsFromPage(IPage page, IReadOnlyList<IElementHandle> partDetailEls, IReadOnlyList<IElementHandle> partNumberEls, Guid partGroupId, Guid partGroupPageId)

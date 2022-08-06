@@ -1,0 +1,101 @@
+﻿@model App.Core.Models.Rendering.TableOfContents
+@{
+    Layout = "Shared/_Layout.cshtml";
+
+    const int breakCount = 35;
+    const int nameWidth = 400;
+    const int partNumberWidth = 200;
+    const int partDiagramNumberWidth = 100;
+    const int offset = 20;
+    int counter = 0;
+
+    static string AsPixel(int width) => $"{width}px";
+}
+
+<div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff; margin-bottom: 20px;">
+    Table of contents
+</div>
+
+@foreach (var partGroup in Model.PartGroups)
+{
+    @if (counter > breakCount)
+    {
+        <div style="page-break-after: always;"></div>
+
+        <div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff; margin-bottom: 20px;">
+            Table of contents
+        </div>
+
+        counter = 0;
+    }
+
+    <div style="@(counter == 0 ? "" : "margin-top: 20px;")">
+        <div style="float:left; width: @AsPixel(nameWidth + partNumberWidth + partDiagramNumberWidth);">
+            <strong>@partGroup.Title</strong>
+        </div>
+        <div style="float:left;">
+            <strong>@partGroup.PageNumber</strong>
+        </div>
+        <div style="clear:both;"></div>
+    </div>
+
+    @foreach (var partGroupPage in partGroup.PartGroupPages)
+    {
+        @if (counter > breakCount)
+        {
+            <div style="page-break-after: always;"></div>
+
+            <div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff; margin-bottom: 20px;">
+                Table of contents
+            </div>
+
+            counter = 0;
+        }
+
+        <div style="margin-left: @AsPixel(offset);">
+            <div style="float:left; width: @AsPixel(nameWidth + partNumberWidth + partDiagramNumberWidth - offset)">
+                <strong>@partGroupPage.Title</strong>
+            </div>
+            <div style="float:left;">
+                <strong>@partGroupPage.PageNumber</strong>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+
+        @foreach (var part in partGroupPage.Parts)
+        {
+            @if (counter > breakCount)
+            {
+                <div style="page-break-after: always;"></div>
+
+                <div style="width: calc(100% - 30px); background-color: darkcyan; padding: 15px; color: #fff; margin-bottom: 20px;">
+                    Table of contents
+                </div>
+
+                counter = 0;
+            }
+
+            <div style="margin-left: @AsPixel(offset * 2);">
+                <div style="float:left; width: @AsPixel(partDiagramNumberWidth);">
+                    @part.DiagramPartNumber
+                </div>
+                <div style="float:left; width: @AsPixel(nameWidth - (offset * 2));">
+                    @part.Title
+                </div>
+                <div style="float:left; width: @AsPixel(partNumberWidth);">
+                    @part.PartNumber
+                </div>
+                <div style="float:left;">
+                    @part.PageNumber
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+
+            counter++;
+        }
+
+        counter++;
+    }
+
+    counter++;
+}

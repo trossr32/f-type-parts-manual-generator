@@ -13,7 +13,7 @@
     },
     "Build PDF (debug)": {
       "commandName": "Project",
-      "commandLineArgs": "build-pdf --data-file C:\\Temp\\f-type-parts-scraper.20220804_210355\\results.json"
+      "commandLineArgs": "build-pdf --data-file C:\\Temp\\f-type-parts-manual-generator.runs\\f-type-parts-scraper.20220806_005146\\results.sample.json"
     },
     "Build PDF (release)": {
       "commandName": "Project",

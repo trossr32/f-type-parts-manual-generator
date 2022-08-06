@@ -1,5 +1,4 @@
-﻿@using App.Core.Extensions
-@model App.Core.Models.Data.PartGroup
+﻿@model App.Core.Models.Data.PartGroup
 @{
     Layout = "Shared/_Layout.cshtml";
 }
@@ -13,11 +12,11 @@
 </div>
 
 <div style="width: 100%;">
-    @foreach (var (page, i) in Model.Pages.WithIndex())
+    @foreach (var page in Model.Pages)
     {
-        <div style="width: 80%; border: 1px solid darkcyan; background-color: darkcyan; color: #fff; margin-top: 10px; margin: 10px auto 0;">
-            <div style="width: 100px; padding-left: 10px;">
-                @($"{Model.Name} {(Model.Pages.Count > 1 ? $"Part {i+1}" : "")}")
+        <div style="width: 80%; border: 1px solid darkcyan; background-color: darkcyan; color: #fff; margin: 10px auto;">
+            <div style="padding-left: 10px;">
+                @($"{page.Name} {(Model.Pages.Count > 1 ? $" - Part {page.SubSection}" : "")}")
             </div>
         </div>
     }
